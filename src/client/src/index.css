@@ -5,7 +5,7 @@ body {
 }
 
 .app {
-  max-width: 800px;
+  max-width: 1000px;
   margin: 0 auto;
   padding: 20px;
 }
@@ -23,7 +23,19 @@ header {
 
 h1 {
   margin: 0;
-  color: #333;
+  color: #004080;
+  font-size: 28px;
+}
+
+.station-selector {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.station-selector label {
+  font-weight: 500;
+  color: #666;
 }
 
 select {
@@ -31,6 +43,27 @@ select {
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 14px;
+  min-width: 250px;
+}
+
+button {
+  padding: 8px 16px;
+  border: 1px solid #004080;
+  background: #004080;
+  color: white;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+button:hover:not(:disabled) {
+  background: #003060;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .schedule {
@@ -43,9 +76,17 @@ select {
 .schedule h2 {
   margin: 0;
   padding: 20px;
-  background: #007bff;
+  background: #004080;
   color: white;
-  text-transform: capitalize;
+}
+
+.schedule-info {
+  margin: 0;
+  padding: 15px 20px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+  color: #666;
+  font-size: 14px;
 }
 
 .entries {
@@ -53,30 +94,64 @@ select {
 }
 
 .entry {
-  display: grid;
-  grid-template-columns: 80px 120px 1fr 1fr auto;
-  gap: 15px;
-  padding: 15px 20px;
+  padding: 20px;
   border-bottom: 1px solid #eee;
-  align-items: center;
+  transition: background 0.2s;
+}
+
+.entry:hover {
+  background: #f8f9fa;
 }
 
 .entry:last-child {
   border-bottom: none;
 }
 
-.track {
-  font-weight: bold;
-  color: #007bff;
+.train-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
 }
 
-.time {
+.train-name {
+  font-size: 18px;
+  font-weight: bold;
+  color: #004080;
+}
+
+.train-id {
+  font-size: 14px;
+  color: #999;
+}
+
+.train-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 20px;
+}
+
+.times {
   display: flex;
   flex-direction: column;
+  gap: 8px;
 }
 
-.scheduled {
-  font-weight: bold;
+.arrival, .departure {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.times .label {
+  font-size: 12px;
+  color: #666;
+  text-transform: uppercase;
+}
+
+.times .time {
+  font-size: 16px;
+  font-weight: 600;
 }
 
 .actual {
@@ -84,12 +159,34 @@ select {
   color: #dc3545;
 }
 
-.destination {
-  font-weight: bold;
+.route-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.next-station {
+.destination, .next-station {
+  display: flex;
+  gap: 8px;
+}
+
+.route-info .label {
+  font-size: 12px;
   color: #666;
+  text-transform: uppercase;
+  min-width: 40px;
+}
+
+.status-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.track {
+  font-weight: bold;
+  color: #28a745;
   font-size: 14px;
 }
 
@@ -97,4 +194,22 @@ select {
   color: #666;
   font-size: 12px;
   text-transform: uppercase;
+}
+
+.system {
+  font-size: 12px;
+  color: #999;
+  background: #f0f0f0;
+  padding: 2px 8px;
+  border-radius: 3px;
+}
+
+.loading, .error, .no-data, .no-trains {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+}
+
+.error {
+  color: #dc3545;
 }
