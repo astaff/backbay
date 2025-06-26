@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
 import { TrainScheduleResponse } from '../../shared/types'
 
 const AMTRAK_STATIONS = [
@@ -17,16 +18,20 @@ const AMTRAK_STATIONS = [
 ]
 
 function App() {
+  const { stationId: urlStationId } = useParams<{ stationId: string }>()
+  const navigate = useNavigate()
   const [schedule, setSchedule] = useState<TrainScheduleResponse | null>(null)
   const [loading, setLoading] = useState(false)
-  const [stationId, setStationId] = useState('NYP')
+  const [stationId, setStationId] = useState(urlStationId || 'NYP')
   const [error, setError] = useState<string | null>(null)
+  
+  const isViewMode = Boolean(urlStationId)
 
-  const fetchSchedule = async () => {
+  const fetchSchedule = async (targetStationId = stationId) => {
     setLoading(true)
     setError(null)
     try {
-      const response = await fetch(`/api/train/schedule/${stationId}`)
+      const response = await fetch(`/api/train/schedule/${targetStationId}`)
       if (!response.ok) {
         throw new Error('Failed to fetch schedule')
       }
@@ -39,7 +44,18 @@ function App() {
       setLoading(false)
     }
   }
+  
+  const handleStationChange = (newStationId: string) => {
+    setStationId(newStationId)
+    navigate(`/view/${newStationId}`)
+  }
 
+  useEffect(() => {
+    if (urlStationId && urlStationId !== stationId) {
+      setStationId(urlStationId)
+    }
+  }, [urlStationId])
+  
   useEffect(() => {
     fetchSchedule()
   }, [stationId])
@@ -53,28 +69,45 @@ function App() {
               🚄 Train Schedule
             </h1>
             <div className="flex items-center gap-3">
-              <label htmlFor="station-select" className="text-sm font-medium text-gray-600">
-                Station
-              </label>
-              <select 
-                id="station-select"
-                value={stationId} 
-                onChange={(e) => setStationId(e.target.value)}
-                className="px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm min-w-64 bg-white"
-              >
-                {AMTRAK_STATIONS.map(station => (
-                  <option key={station.code} value={station.code}>
-                    {station.name} ({station.code})
-                  </option>
-                ))}
-              </select>
+              {!isViewMode && (
+                <>
+                  <label htmlFor="station-select" className="text-sm font-medium text-gray-600">
+                    Station
+                  </label>
+                  <select 
+                    id="station-select"
+                    value={stationId} 
+                    onChange={(e) => handleStationChange(e.target.value)}
+                    className="px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm min-w-64 bg-white"
+                  >
+                    {AMTRAK_STATIONS.map(station => (
+                      <option key={station.code} value={station.code}>
+                        {station.name} ({station.code})
+                      </option>
+                    ))}
+                  </select>
+                </>
+              )}
+              {isViewMode && (
+                <div className="text-sm text-gray-600">
+                  Viewing: <span className="font-medium">{AMTRAK_STATIONS.find(s => s.code === stationId)?.name || stationId}</span>
+                </div>
+              )}
               <button 
-                onClick={fetchSchedule} 
+                onClick={() => fetchSchedule()} 
                 disabled={loading}
                 className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white rounded-lg transition-colors duration-200 text-sm font-medium"
               >
                 {loading ? '🔄' : '↻'} Refresh
               </button>
+              {isViewMode && (
+                <button 
+                  onClick={() => navigate('/')}
+                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors duration-200 text-sm font-medium"
+                >
+                  ← All Stations
+                </button>
+              )}
             </div>
           </div>
         </header>

@@ -21,5 +21,8 @@ export default defineConfig({
         changeOrigin: true
       }
     }
+  },
+  preview: {
+    historyApiFallback: true
   }
 })
