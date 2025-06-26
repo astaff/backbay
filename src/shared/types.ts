@@ -1,4 +1,7 @@
 export interface TrainEntry {
+  trainId: number;
+  trainName: string;
+  trainSystem: string;
   track: string;
   departureTime: string;
   arrivalTime?: string;

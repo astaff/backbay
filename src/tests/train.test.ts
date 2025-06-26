@@ -2,18 +2,21 @@ import { describe, it, expect } from 'vitest'
 import { get_train_schedule } from '../server/routes/train.js'
 
 describe('get_train_schedule', () => {
-  it('returns train schedule for any station', () => {
-    const result = get_train_schedule('south-station')
+  it('returns train schedule for NYP with multiple trains', async () => {
+    const result = await get_train_schedule('NYP')
     
-    expect(result).toHaveLength(3)
-    expect(result[0].track).toBe('1')
-    expect(result[0].destination).toBe('North Station')
+    expect(result.length).toBeGreaterThan(5)
   })
 
-  it('returns same mock data regardless of station', () => {
-    const result1 = get_train_schedule('south-station')
-    const result2 = get_train_schedule('back-bay')
+  it('returns train schedule for WAS with multiple trains', async () => {
+    const result = await get_train_schedule('WAS')
     
-    expect(result1).toEqual(result2)
+    expect(result.length).toBeGreaterThan(5)
+  })
+
+  it('returns train schedule for smaller stations', async () => {
+    const result = await get_train_schedule('SAC')
+    
+    expect(result.length).toBeGreaterThan(0)
   })
 })

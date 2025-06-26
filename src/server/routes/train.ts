@@ -1,50 +1,31 @@
 import { Hono } from 'hono'
 import { TrainEntry, TrainScheduleResponse } from '../../shared/types.js'
+import { trainSystemManager } from '../services/train-systems/TrainSystemManager.js'
 
 export const trainRoutes = new Hono()
 
-export function get_train_schedule(_station_id: string): TrainEntry[] {
-  // Mock data for demonstration
-  const mockEntries: TrainEntry[] = [
-    {
-      track: "1",
-      departureTime: "08:15",
-      nextStation: "South Station",
-      direction: "Inbound",
-      actualTime: "08:17",
-      destination: "North Station"
-    },
-    {
-      track: "2", 
-      departureTime: "08:22",
-      nextStation: "Back Bay",
-      direction: "Outbound",
-      actualTime: "08:22",
-      destination: "Worcester"
-    },
-    {
-      track: "3",
-      departureTime: "08:30",
-      nextStation: "Ruggles",
-      direction: "Inbound", 
-      actualTime: "08:32",
-      destination: "North Station"
-    }
-  ]
-
-  // Filter or modify based on station_id in real implementation
-  return mockEntries
+export async function get_train_schedule(station_id: string, systemName?: string): Promise<TrainEntry[]> {
+  const system = systemName 
+    ? trainSystemManager.getSystem(systemName) 
+    : trainSystemManager.getDefaultSystem()
+    
+  if (!system) {
+    throw new Error(`Train system not found: ${systemName}`)
+  }
+  
+  return await system.fetchTrainSchedule(station_id)
 }
 
 trainRoutes.get('/schedule/:stationId', async (c) => {
   const stationId = c.req.param('stationId')
+  const system = c.req.query('system')
   
   if (!stationId) {
     return c.json({ error: 'Station ID is required' }, 400)
   }
 
   try {
-    const entries = get_train_schedule(stationId)
+    const entries = await get_train_schedule(stationId, system)
     const response: TrainScheduleResponse = {
       entries,
       stationId,
@@ -53,6 +34,7 @@ trainRoutes.get('/schedule/:stationId', async (c) => {
     
     return c.json(response)
   } catch (error) {
+    console.error('Error fetching train schedule:', error)
     return c.json({ error: 'Failed to fetch train schedule' }, 500)
   }
 })
