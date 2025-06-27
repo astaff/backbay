@@ -1,6 +1,6 @@
-import { pbkdf2Sync, createDecipheriv } from 'crypto'
 import { TrainSystem } from './TrainSystem.js'
 import { TrainEntry } from '../../../shared/types.js'
+import { getCryptoAdapter } from './crypto-adapter.js'
 
 interface StationInfo {
   code: string
@@ -44,20 +44,23 @@ export class AmtrakSystem implements TrainSystem {
   name = 'Amtrak'
   
   private readonly TRAIN_URL = 'https://maps.amtrak.com/services/MapDataService/trains/getTrainsData'
-  private readonly S_VALUE = Buffer.from('9a3686ac', 'hex')
-  private readonly I_VALUE = Buffer.from('c6eb2f7f5c4740c1a2f708fefd947d39', 'hex')
+  private readonly S_VALUE = new Uint8Array([0x9a, 0x36, 0x86, 0xac])
+  private readonly I_VALUE = new Uint8Array([0xc6, 0xeb, 0x2f, 0x7f, 0x5c, 0x47, 0x40, 0xc1, 0xa2, 0xf7, 0x08, 0xfe, 0xfd, 0x94, 0x7d, 0x39])
   private readonly PUBLIC_KEY = '69af143c-e8cf-47f8-bf09-fc1f61e5cc33'
   private readonly MASTER_SEGMENT = 88
 
   private async decrypt(content: string, key: string): Promise<string> {
-    const derived = pbkdf2Sync(key, this.S_VALUE, 1000, 16, 'sha1')
-    const decipher = createDecipheriv('aes-128-cbc', derived, this.I_VALUE)
-    decipher.setAutoPadding(true)
-    const data = Buffer.concat([
-      decipher.update(Buffer.from(content, 'base64')),
-      decipher.final(),
-    ])
-    return data.toString('utf-8')
+    const cryptoAdapter = getCryptoAdapter()
+    const derived = await cryptoAdapter.pbkdf2(key, this.S_VALUE, 1000, 16)
+    
+    // Decode base64 content
+    const contentBytes = Uint8Array.from(atob(content), c => c.charCodeAt(0))
+    
+    // Decrypt
+    const decrypted = await cryptoAdapter.decryptAes128Cbc(derived, this.I_VALUE, contentBytes)
+    
+    const decoder = new TextDecoder()
+    return decoder.decode(decrypted)
   }
 
   private parseStationInfo(stationStr: string | null): StationInfo | null {
