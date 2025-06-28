@@ -20,3 +20,6 @@ lint:
 
 typecheck:
 	npm run typecheck
+
+deploy:
+	npx wrangler deploy

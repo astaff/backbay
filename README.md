@@ -1,21 +1,41 @@
-# BackBay
+# Back Bay: Minimalist train schedule display
 
-Modern TypeScript full-stack application for train schedule management.
+A real alternative to aging digital signage solutions.
+
+1. Web page that displays train schedule for a station ID (i.e. `http://localhost:3000/view/BBY`)
+2. A Linux box that boots up and displays the page for a given station ID
+
+## Requirements
+
+1. GNU Make
+2. Node.js LTS
+3. (optional) CloudFlare account for hosting
 
 ## Quick Start
 
+### Schedule Page
+
 ```bash
 make install    # Install dependencies
-make test       # Run tests (✓ 2 tests passing)
+make test       # Run tests
 make dev        # Start development servers
+make deploy     # Deploy to ClouldFlare
 ```
+
+### Display Image
+
+```bash
+cd display/
+make build
+```
+
+See [Display README](display/README.md) for details.
 
 ## Architecture
 
 - **Backend**: Hono.js API server on port 3000
 - **Frontend**: React + Vite client with proxy to backend
-- **Shared**: TypeScript types between client/server
-- **Testing**: Vitest for fast unit tests
+- **[Display](display/README.md)**: Raspberry Pi Image that opens a pre-defined URL in a full-screen browser
 
 ## API
 
@@ -27,9 +47,9 @@ Returns train schedule with track, times, destinations, and delays.
 
 ## Deployment
 
-**CloudFlare Workers**
+**CloudFlare**
 ```bash
-npx wrangler deploy
+make deploy
 ```
 
 **Val.town**
@@ -45,5 +65,3 @@ make build      # Build for production
 make typecheck  # TypeScript validation
 make lint       # Code linting
 ```
-
-All commands work as expected. TypeScript compilation clean. Tests passing.
